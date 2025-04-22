@@ -19,6 +19,7 @@ class SavingsGoal(models.Model):
         ('CHF', 'Swiss Franc'),
         ('CNY', 'Chinese Yuan'),
         ('INR', 'Indian Rupee'),
+        ('PKR', 'Pakistani Rupee'),
         ('BRL', 'Brazilian Real'),
         ('RUB', 'Russian Ruble'),
         ('ZAR', 'South African Rand'),
