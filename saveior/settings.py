@@ -144,7 +144,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Login/Logout URLs
 LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 
 # Currency API Settings
