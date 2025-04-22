@@ -151,19 +151,19 @@ LOGIN_URL = 'login'
 CURRENCY_API_KEY = os.getenv('CURRENCY_API_KEY')
 
 # Security Settings
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    X_FRAME_OPTIONS = 'DENY'
-    
-    # CSRF Settings
-    CSRF_TRUSTED_ORIGINS = ['https://saveior.onrender.com']
-    CSRF_COOKIE_DOMAIN = '.onrender.com'
-    CSRF_USE_SESSIONS = True
-    CSRF_COOKIE_HTTPONLY = False  # Must be False for JavaScript to access the token
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+X_FRAME_OPTIONS = 'DENY'
+
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = ['https://saveior.onrender.com']
+CSRF_COOKIE_DOMAIN = None  # Let Django determine the domain
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions
+CSRF_COOKIE_HTTPONLY = False  # Must be False for JavaScript to access the token
+CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests from same site

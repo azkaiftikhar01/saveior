@@ -9,6 +9,9 @@ import requests
 from django.conf import settings
 from django.http import JsonResponse
 from decimal import Decimal
+from django.contrib.auth import login, authenticate
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.contrib.auth.forms import AuthenticationForm
 
 def register(request):
     if request.method == 'POST':
@@ -124,3 +127,18 @@ def convert_currency(request):
                 'error': 'Failed to fetch exchange rate'
             })
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@ensure_csrf_cookie
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'savings/login.html', {'form': form})
