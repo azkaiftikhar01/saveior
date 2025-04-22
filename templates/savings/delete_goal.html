@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Goal - Saveior{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-exclamation-triangle text-warning display-1"></i>
+                <h2 class="mt-4">Delete Savings Goal</h2>
+                <p class="text-muted">Are you sure you want to delete "{{ savings_goal.purpose }}"?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">Delete Goal</button>
+                        <a href="{% url 'savings_goal_detail' savings_goal.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

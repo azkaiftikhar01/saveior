@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load savings_extras %}
+
+{% block title %}Dashboard - Saveior{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+        <p class="lead text-muted">Track your savings goals and progress</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'create_goal' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> New Goal
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Saved</h5>
+                <h2 class="display-6">{{ total_saved|floatformat:2 }}</h2>
+                <p class="card-text">Across all your goals</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Active Goals</h5>
+                <h2 class="display-6">{{ savings_goals.count }}</h2>
+                <p class="card-text">Goals in progress</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Completed Goals</h5>
+                <h2 class="display-6">{{ savings_goals|filter_completed|length }}</h2>
+                <p class="card-text">Goals achieved</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-4">Your Savings Goals</h3>
+        {% if savings_goals %}
+            <div class="row">
+                {% for goal in savings_goals %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ goal.purpose }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">Target: {{ goal.goal_amount }} {{ goal.currency }}</small>
+                                </p>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar {% if goal.completed %}bg-success{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ goal.progress_percentage }}%"
+                                         aria-valuenow="{{ goal.progress_percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ goal.progress_percentage|floatformat:1 }}%
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <strong>Current:</strong> {{ goal.current_amount|floatformat:2 }} {{ goal.currency }}<br>
+                                    <strong>Remaining:</strong> {{ goal.remaining_amount|floatformat:2 }} {{ goal.currency }}<br>
+                                    <strong>Daily Target:</strong> {{ goal.suggested_daily_amount|floatformat:2 }} {{ goal.currency }}
+                                </p>
+                                <a href="{% url 'savings_goal_detail' goal.pk %}" class="btn btn-outline-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-piggy-bank display-1 text-muted"></i>
+                <h3 class="mt-3">No savings goals yet</h3>
+                <p class="text-muted">Create your first savings goal to start tracking your progress!</p>
+                <a href="{% url 'create_goal' %}" class="btn btn-primary btn-lg mt-3">Create Your First Goal</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

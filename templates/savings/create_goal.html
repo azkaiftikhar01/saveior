@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Create Savings Goal - Saveior{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">Create a New Savings Goal</h2>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Create Goal</button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const goalAmount = document.getElementById('id_goal_amount');
+        const totalDays = document.getElementById('id_total_days');
+        const maxDailySaving = document.getElementById('id_max_daily_saving');
+
+        function updateMaxDailySaving() {
+            if (goalAmount.value && totalDays.value) {
+                const minRequired = goalAmount.value / totalDays.value;
+                maxDailySaving.min = minRequired;
+                maxDailySaving.placeholder = `Minimum: ${minRequired.toFixed(2)}`;
+            }
+        }
+
+        goalAmount.addEventListener('input', updateMaxDailySaving);
+        totalDays.addEventListener('input', updateMaxDailySaving);
+    });
+</script>
+{% endblock %} 
