@@ -32,7 +32,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+if os.getenv('ALLOWED_HOSTS'):
+    ALLOWED_HOSTS.extend(os.getenv('ALLOWED_HOSTS').split(','))
 
 
 # Application definition
@@ -88,6 +90,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -150,20 +153,45 @@ LOGIN_URL = 'login'
 # Currency API Settings
 CURRENCY_API_KEY = os.getenv('CURRENCY_API_KEY')
 
-# Security Settings
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-X_FRAME_OPTIONS = 'DENY'
+# Security settings
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
 
 # CSRF Settings
-CSRF_TRUSTED_ORIGINS = ['https://saveior.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://saveior.onrender.com', 'http://127.0.0.1:8000']
 CSRF_COOKIE_DOMAIN = None  # Let Django determine the domain
 CSRF_USE_SESSIONS = False  # Use cookies instead of sessions
 CSRF_COOKIE_HTTPONLY = False  # Must be False for JavaScript to access the token
 CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests from same site
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.yahoo.com'
+EMAIL_PORT = 587  # Yahoo's newer SMTP port
+EMAIL_USE_TLS = True  # Use TLS instead of SSL
+EMAIL_USE_SSL = False  # Disable SSL
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 60  # Increase timeout to 60 seconds
+
+# Gamification Settings
+GAMIFICATION_POINTS = {
+    'daily_saving_completed': 10,
+    'goal_completed': 50,
+    'group_contribution': 5,
+    'invite_accepted': 20,
+    'streak_bonus': 5,  # Bonus points for consecutive days of saving
+}

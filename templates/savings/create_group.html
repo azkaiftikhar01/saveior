@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Create Group Savings</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Group Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="invalid-feedback">Please provide a group name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="goal_amount" class="form-label">Goal Amount</label>
+                            <input type="number" class="form-control" id="goal_amount" name="goal_amount" step="0.01" min="0.01" required>
+                            <div class="invalid-feedback">Please enter a valid goal amount greater than 0.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="currency" class="form-label">Currency</label>
+                            <select class="form-select" id="currency" name="currency" required>
+                                <option value="" selected disabled>Select a currency</option>
+                                {% for code, name in currency_choices %}
+                                    <option value="{{ code }}">{{ name }} ({{ code }})</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a currency.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="target_date" class="form-label">Target Date</label>
+                            <input type="date" class="form-control" id="target_date" name="target_date" 
+                                   min="{{ min_date }}" required>
+                            <div class="invalid-feedback">Please select a future date.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Group</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+{% endblock %} 

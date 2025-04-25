@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Group Savings Invitation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>You've been invited to join a savings group!</h2>
+    
+    <p>Hello,</p>
+    
+    <p>{{ invitation.invited_by.username }} has invited you to join their savings group "{{ group.name }}".</p>
+    
+    <div class="details">
+        <h3>Group Details:</h3>
+        <p><strong>Name:</strong> {{ group.name }}</p>
+        <p><strong>Description:</strong> {{ group.description }}</p>
+        <p><strong>Goal Amount:</strong> {{ group.goal_amount }} {{ group.currency }}</p>
+        <p><strong>Target Date:</strong> {{ group.target_date }}</p>
+        <p><strong>Current Progress:</strong> {{ group.progress_percentage|floatformat:1 }}%</p>
+    </div>
+    
+    <p>To accept this invitation and join the group, click the button below:</p>
+    
+    <a href="{{ accept_url }}" class="button">Accept Invitation</a>
+    
+    <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+    <p>{{ accept_url }}</p>
+    
+    <p>This invitation will expire in 7 days.</p>
+    
+    <hr>
+    
+    <p style="color: #666; font-size: 12px;">
+        This email was sent from Saveior, your personal savings assistant.
+        If you didn't expect this invitation, you can safely ignore it.
+    </p>
+</body>
+</html> 

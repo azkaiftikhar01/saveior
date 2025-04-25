@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% if not user.userprofile.is_premium %}
+    {% include 'savings/premium_upsell.html' %}
+{% else %}
+<div class="container py-4">
+    <h2 class="mb-4">Community & Social Feed</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Share a Milestone</h5>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary mt-2">Post</button>
+            </form>
+        </div>
+    </div>
+    {% for post in posts %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center">
+                    <img src="{% if post.user.userprofile.avatar %}{{ post.user.userprofile.avatar.url }}{% else %}https://api.dicebear.com/7.x/identicon/svg?seed={{ post.user.username }}{% endif %}" class="rounded-circle me-2" width="40" height="40" alt="avatar">
+                    <span class="fw-bold">{% if post.is_anonymous %}Anonymous{% else %}{{ post.user.username }}{% endif %}</span>
+                </div>
+                <span class="text-muted small">{{ post.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+            <p class="mb-2">{{ post.content }}</p>
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="Milestone Image" class="img-fluid rounded mb-2" style="max-width: 300px;">
+            {% endif %}
+            <div>
+                <form method="post" action="{% url 'add_comment' post.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="text" name="content" placeholder="Add a comment..." class="form-control d-inline w-auto" style="display:inline-block; width:200px;">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>
+                </form>
+                <form method="post" action="{% url 'add_reaction' post.id %}" class="d-inline ms-2">
+                    {% csrf_token %}
+                    <input type="text" name="emoji" placeholder="😊" maxlength="2" class="form-control d-inline w-auto" style="display:inline-block; width:60px;">
+                    <button type="submit" class="btn btn-sm btn-outline-success">React</button>
+                </form>
+            </div>
+            <div class="mt-2">
+                <span class="me-3"><i class="fas fa-comments"></i> {{ post.comments.count }} Comments</span>
+                <span><i class="fas fa-smile"></i> {{ post.reactions.count }} Reactions</span>
+            </div>
+            {% if post.comments.all %}
+            <div class="mt-2">
+                {% for comment in post.comments.all %}
+                    <div class="border rounded p-2 mb-1 bg-light d-flex align-items-center">
+                        <img src="{% if comment.user.userprofile.avatar %}{{ comment.user.userprofile.avatar.url }}{% else %}https://api.dicebear.com/7.x/identicon/svg?seed={{ comment.user.username }}{% endif %}" class="rounded-circle me-2" width="28" height="28" alt="avatar">
+                        <span class="fw-bold small">{{ comment.user.username }}</span>: {{ comment.content }}
+                        <span class="text-muted small ms-2">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if post.reactions.all %}
+            <div class="mt-2">
+                {% for reaction in post.reactions.all %}
+                    <span class="me-2">{{ reaction.emoji }} <span class="text-muted small">by {{ reaction.user.username }}</span></span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">No posts yet. Be the first to share a milestone!</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %} 

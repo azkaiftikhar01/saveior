@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if not user.userprofile.is_premium %}
+    {% include 'savings/premium_upsell.html' %}
+{% else %}
+<div class="container py-4">
+    <h2 class="mb-4">Monthly Challenges & Giveaways</h2>
+    {% if challenges %}
+        <ul class="list-group mb-4">
+            {% for challenge in challenges %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-bold">{{ challenge.name }}</span>
+                        <span class="text-muted small ms-2">{{ challenge.start_date|date:"M d, Y" }} - {{ challenge.end_date|date:"M d, Y" }}</span>
+                        <div>{{ challenge.description }}</div>
+                        <div class="small text-success">Reward: {{ challenge.reward }}</div>
+                    </div>
+                    {% if challenge.id in participated_ids %}
+                        <span class="badge bg-success">Joined</span>
+                    {% else %}
+                        <a href="{% url 'join_challenge_premium' challenge.id %}" class="btn btn-primary btn-sm">Join</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info">No active challenges right now. Check back soon!</div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %} 

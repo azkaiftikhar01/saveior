@@ -1,47 +1,178 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load savings_extras %}
+{% load static %}
 
 {% block title %}Dashboard - Saveior{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-8">
-        <h1 class="display-4">Welcome, {{ user.username }}!</h1>
-        <p class="lead text-muted">Track your savings goals and progress</p>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="achievement-badge mb-3">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <h3 class="card-title">Total Savings</h3>
+                <h2 class="text-primary mb-0">${{ total_savings|default:"0.00" }}</h2>
+                <p class="text-muted mt-2">Keep up the great work! 🎉</p>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4 text-end">
-        <a href="{% url 'create_goal' %}" class="btn btn-primary btn-lg">
-            <i class="bi bi-plus-circle"></i> New Goal
-        </a>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="achievement-badge mb-3" style="animation-delay: 0.2s">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h3 class="card-title">Active Goals</h3>
+                <h2 class="text-primary mb-0">{{ active_goals_count }}</h2>
+                <p class="text-muted mt-2">You're on fire! 🔥</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="achievement-badge mb-3" style="animation-delay: 0.4s">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="card-title">Group Goals</h3>
+                <h2 class="text-primary mb-0">{{ group_goals_count }}</h2>
+                <p class="text-muted mt-2">Teamwork makes the dream work! 👥</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card bg-primary text-white">
+    <div class="col-12">
+        <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Total Saved</h5>
-                <h2 class="display-6">{{ total_saved|floatformat:2 }}</h2>
-                <p class="card-text">Across all your goals</p>
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-trophy text-warning me-2"></i>
+                    Your Achievements
+                </h3>
+                <div class="row">
+                    {% for achievement in achievements %}
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="achievement-badge" style="background: linear-gradient(135deg, {{ achievement.color }} 0%, {{ achievement.color }} 100%)">
+                            <i class="{{ achievement.icon }}"></i>
+                        </div>
+                        <h5 class="text-center mt-2">{{ achievement.name }}</h5>
+                        <p class="text-center text-muted">{{ achievement.description }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No achievements yet. Start saving to earn your first badge! 🎯</p>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card bg-success text-white">
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Active Goals</h5>
-                <h2 class="display-6">{{ savings_goals.count }}</h2>
-                <p class="card-text">Goals in progress</p>
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-chart-line text-primary me-2"></i>
+                    Active Goals
+                </h3>
+                <div class="row">
+                    {% for goal in active_goals %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">{% if goal.name %}{{ goal.name }}{% else %}Unnamed Goal{% endif %}</h4>
+                                    <span class="badge bg-primary">{{ goal.currency }}</span>
+                                </div>
+                                <div class="progress mb-3" style="height: 30px;">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ goal.progress_percentage|floatformat:2 }}%">
+                                        {{ goal.progress_percentage|floatformat:2 }}%
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Saved: {{ goal.current_amount }} {{ goal.currency }}</span>
+                                    <span class="text-muted">Target: {{ goal.target_amount }} {{ goal.currency }}</span>
+                                </div>
+                                <div class="mt-3 d-flex gap-2">
+                                    <a href="{% url 'savings_goal_detail' goal.id %}" class="btn btn-primary w-100">
+                                        View Details
+                                    </a>
+                                    <a href="{% url 'delete_savings_goal' goal.id %}" class="btn btn-danger w-100">
+                                        Delete
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No active goals yet. Create your first goal to start saving! 🎯</p>
+                        <a href="{% url 'create_goal' %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Create New Goal
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card bg-info text-white">
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Completed Goals</h5>
-                <h2 class="display-6">{{ savings_goals|filter_completed|length }}</h2>
-                <p class="card-text">Goals achieved</p>
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-chart-pie text-success me-2"></i>
+                    Savings Stats
+                </h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Daily Progress</h5>
+                                <div class="progress mb-3" style="height: 30px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ daily_progress|floatformat:2 }}%">
+                                        {{ daily_progress|floatformat:2 }}%
+                                    </div>
+                                </div>
+                                <p class="text-muted mb-0">Keep up the daily savings! 💪</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Monthly Progress</h5>
+                                <div class="progress mb-3" style="height: 30px;">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ monthly_progress|floatformat:2 }}%">
+                                        {{ monthly_progress|floatformat:2 }}%
+                                    </div>
+                                </div>
+                                <p class="text-muted mb-0">You're making great progress! 🌟</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Yearly Progress</h5>
+                                <div class="progress mb-3" style="height: 30px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ yearly_progress|floatformat:2 }}%">
+                                        {{ yearly_progress|floatformat:2 }}%
+                                    </div>
+                                </div>
+                                <p class="text-muted mb-0">Long-term goals are within reach! 🎯</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -49,46 +180,139 @@
 
 <div class="row">
     <div class="col-12">
-        <h3 class="mb-4">Your Savings Goals</h3>
-        {% if savings_goals %}
-            <div class="row">
-                {% for goal in savings_goals %}
-                    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-users text-info me-2"></i>
+                    Group Goals
+                </h3>
+                <div class="row">
+                    {% for group in group_goals %}
+                    <div class="col-md-6 mb-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h5 class="card-title">{{ goal.purpose }}</h5>
-                                <p class="card-text">
-                                    <small class="text-muted">Target: {{ goal.goal_amount }} {{ goal.currency }}</small>
-                                </p>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar {% if goal.completed %}bg-success{% endif %}" 
-                                         role="progressbar" 
-                                         style="width: {{ goal.progress_percentage }}%"
-                                         aria-valuenow="{{ goal.progress_percentage }}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                        {{ goal.progress_percentage|floatformat:1 }}%
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">{% if group.name %}{{ group.name }}{% else %}Unnamed Group{% endif %}</h4>
+                                    <span class="badge bg-primary">{{ group.members.count }} members</span>
+                                </div>
+                                <div class="progress mb-3" style="height: 30px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ group.progress_percentage|floatformat:2 }}%">
+                                        {{ group.progress_percentage|floatformat:2 }}%
                                     </div>
                                 </div>
-                                <p class="card-text">
-                                    <strong>Current:</strong> {{ goal.current_amount|floatformat:2 }} {{ goal.currency }}<br>
-                                    <strong>Remaining:</strong> {{ goal.remaining_amount|floatformat:2 }} {{ goal.currency }}<br>
-                                    <strong>Daily Target:</strong> {{ goal.suggested_daily_amount|floatformat:2 }} {{ goal.currency }}
-                                </p>
-                                <a href="{% url 'savings_goal_detail' goal.pk %}" class="btn btn-outline-primary">View Details</a>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Target: {{ group.goal_amount }} {{ group.currency }}</span>
+                                    <span class="text-muted">Saved: {{ group.current_amount }} {{ group.currency }}</span>
+                                </div>
+                                <div class="mt-3">
+                                    <a href="{% url 'group_detail' group.id %}" class="btn btn-primary w-100">
+                                        View Group
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No group goals yet. Create or join a group to save together! 👥</p>
+                        <a href="{% url 'create_group' %}" class="btn btn-info">
+                            <i class="fas fa-plus-circle me-2"></i>Create New Group
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-        {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-piggy-bank display-1 text-muted"></i>
-                <h3 class="mt-3">No savings goals yet</h3>
-                <p class="text-muted">Create your first savings goal to start tracking your progress!</p>
-                <a href="{% url 'create_goal' %}" class="btn btn-primary btn-lg mt-3">Create Your First Goal</a>
-            </div>
-        {% endif %}
+        </div>
     </div>
 </div>
+
+<!-- Premium Features Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-crown text-warning me-2"></i>
+                    Premium Features
+                </h3>
+                {% if user.is_authenticated and user.userprofile.is_premium %}
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title"><i class="fas fa-users"></i> Team-Based Saving Goals</h4>
+                                    <p>Manage and join team goals for your company or HR team. (Feature coming soon!)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title"><i class="fas fa-heartbeat"></i> Financial Wellness Plans</h4>
+                                    <p>Access stress-reducing financial plans tailored for employees. (Feature coming soon!)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title"><i class="fas fa-comments"></i> Community & Social Feed</h4>
+                                    <p>Share milestones, comment, react, cheer, and use anonymous mode. (Feature coming soon!)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title"><i class="fas fa-trophy"></i> Monthly Challenges & Giveaways</h4>
+                                    <p>Participate in monthly savings challenges and win giveaways. (Feature coming soon!)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title"><i class="fas fa-gift"></i> Wishlist-Driven Saving</h4>
+                                    <p>Add wishlist items and see your progress visually (e.g., unblur an image as you save). (Feature coming soon!)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-lock me-2"></i>
+                        <strong>Premium features are locked.</strong> <button class="btn btn-sm btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#premiumModal">Go Premium</button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add animation classes to elements when they come into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('float-animation');
+            }
+        });
+    });
+
+    document.querySelectorAll('.card').forEach(card => {
+        observer.observe(card);
+    });
+
+    // Add shine effect to buttons on hover
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('mouseenter', () => {
+            button.classList.add('shine-animation');
+        });
+        button.addEventListener('mouseleave', () => {
+            button.classList.remove('shine-animation');
+        });
+    });
+</script>
 {% endblock %} 

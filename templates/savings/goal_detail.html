@@ -1,150 +1,148 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}{{ goal.purpose }} - Saveior{% endblock %}
+{% block title %}{{ goal.name }} - Saveior{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4">
+<div class="container py-4">
+    <div class="row">
         <div class="col-md-8">
-            <h1 class="display-4">{{ goal.purpose }}</h1>
-            <p class="lead text-muted">Track your progress and add savings</p>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ goal.name }}</h3>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Goal Progress</h5>
-                    <div class="progress mb-3" style="height: 30px;">
-                        <div class="progress-bar {% if goal.completed %}bg-success{% endif %}" 
-                             role="progressbar" 
-                             style="width: {{ goal.progress_percentage }}%"
-                             aria-valuenow="{{ goal.progress_percentage }}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                            {{ goal.progress_percentage|floatformat:1 }}%
+                    <div class="mb-4">
+                        <h4 class="h5 mb-3">Goal Details</h4>
+                        <p class="mb-2"><strong>Target Amount:</strong> {{ goal.currency }} {{ goal.target_amount|floatformat:2 }}</p>
+                        <p class="mb-2"><strong>Current Amount:</strong> {{ goal.currency }} {{ goal.current_amount|floatformat:2 }}</p>
+                        <p class="mb-2"><strong>End Date:</strong> {{ goal.end_date|date:"M d, Y" }}</p>
+                        <p class="mb-2"><strong>Days Remaining:</strong> {{ goal.days_remaining }}</p>
+                        <p class="mb-2"><strong>Suggested Daily Amount:</strong> {{ goal.currency }} {{ goal.suggested_daily_amount|floatformat:2 }}</p>
+                        
+                        <div class="progress mt-3" style="height: 25px;">
+                            <div class="progress-bar bg-success" 
+                                 role="progressbar" 
+                                 style="width: {{ goal.progress_percentage }}%;"
+                                 aria-valuenow="{{ goal.progress_percentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                {{ goal.progress_percentage|floatformat:1 }}%
+                            </div>
                         </div>
                     </div>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <h6 class="text-muted">Target</h6>
-                            <h4>{{ goal.goal_amount|floatformat:2 }} {{ goal.currency }}</h4>
-                        </div>
-                        <div class="col-4">
-                            <h6 class="text-muted">Current</h6>
-                            <h4>{{ goal.current_amount|floatformat:2 }} {{ goal.currency }}</h4>
-                        </div>
-                        <div class="col-4">
-                            <h6 class="text-muted">Remaining</h6>
-                            <h4>{{ goal.remaining_amount|floatformat:2 }} {{ goal.currency }}</h4>
-                        </div>
+
+                    <div class="mb-4">
+                        <h4 class="h5 mb-3">Gift Contributions</h4>
+                        {% if goal.allow_gifts %}
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-gift me-2"></i>Gift Link Active</h5>
+                                <p class="mb-2">Share this link with friends and family to receive contributions:</p>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'gift_goal' goal.gift_link %}" id="giftLink" readonly>
+                                    <button class="btn btn-outline-primary" onclick="copyGiftLink()">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center">
+                                <p class="text-muted">Enable gift contributions to receive support from friends and family.</p>
+                                <form method="post" action="{% url 'create_gift_link' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="goal_id" value="{{ goal.id }}">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-gift me-1"></i> Enable Gift Contributions
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
                     </div>
+
+                    <h3 class="h5 mb-3">Daily Savings Plan</h3>
+                    {% if not goal.daily_savings.exists %}
+                        <div class="text-center mb-4">
+                            <p class="text-muted">No daily savings plan generated yet.</p>
+                            <form method="post" action="{% url 'generate_daily_plan' goal.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-calendar-plus"></i> Generate Daily Plan
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="row">
+                            {% for daily_saving in goal.daily_savings.all %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 {% if daily_saving.completed %}border-success bg-light{% endif %}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Day {{ daily_saving.day_number }}</h5>
+                                            <p class="card-text mb-2">
+                                                <strong>Amount:</strong> {{ goal.currency }} {{ daily_saving.amount|floatformat:2 }}
+                                            </p>
+                                            {% if not daily_saving.completed %}
+                                                <form action="{% url 'mark_daily_saving_completed' goal.id daily_saving.day_number %}" 
+                                                      method="post" 
+                                                      class="mark-complete-form">
+                                                    {% csrf_token %}
+                                                    <button type="submit" 
+                                                            class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-check"></i> Mark Complete
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <div class="text-success">
+                                                    <i class="fas fa-check-circle"></i> Completed on {{ daily_saving.completed_date|date:"M d, Y" }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm">
+        
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Add Transaction</h4>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Add Savings</h5>
-                    <form method="post" novalidate>
+                    <form method="post">
                         {% csrf_token %}
                         {{ form|crispy }}
-                        <div class="d-grid gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary">Add Savings</button>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Add Transaction</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Daily Savings Plan</h5>
-                    {% if daily_plan %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Target Amount</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for date, amount in daily_plan.items %}
-                                        <tr>
-                                            <td>{{ date }}</td>
-                                            <td>{{ amount|floatformat:2 }} {{ goal.currency }}</td>
-                                            <td>
-                                                {% if date|date:"Y-m-d" <= today|date:"Y-m-d" %}
-                                                    <span class="badge bg-success">Completed</span>
-                                                {% else %}
-                                                    <span class="badge bg-primary">Pending</span>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <p class="text-muted">No daily savings plan available.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Transaction History</h5>
-                    {% if transactions %}
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Notes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for transaction in transactions %}
-                                        <tr>
-                                            <td>{{ transaction.date|date:"M d, Y" }}</td>
-                                            <td>{{ transaction.amount|floatformat:2 }} {{ goal.currency }}</td>
-                                            <td>{{ transaction.notes|default:"-" }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center py-3">No transactions yet</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-12 text-end">
-            <a href="{% url 'delete_savings_goal' goal.pk %}" class="btn btn-danger">
-                <i class="bi bi-trash"></i> Delete Goal
-            </a>
-        </div>
-    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any JavaScript functionality here
+    });
+
+    function copyGiftLink() {
+        const giftLink = document.getElementById('giftLink');
+        giftLink.select();
+        document.execCommand('copy');
+        
+        // Show feedback
+        const button = event.currentTarget;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            button.innerHTML = originalText;
+        }, 2000);
+    }
+</script>
 {% endblock %} 

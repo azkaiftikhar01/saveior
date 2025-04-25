@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if not user.userprofile.is_premium %}
+    {% include 'savings/premium_upsell.html' %}
+{% else %}
+<div class="container py-4">
+    <h2 class="mb-4">Team Goals</h2>
+    <a href="{% url 'create_team_goal' %}" class="btn btn-primary mb-3">Create Team Goal</a>
+    {% if team_goals %}
+        <ul class="list-group">
+            {% for goal in team_goals %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'team_goal_detail' goal.id %}">{{ goal.name }}</a>
+                    <span class="badge bg-secondary">{{ goal.members.count }} members</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No team goals yet. Start by creating one!</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %} 

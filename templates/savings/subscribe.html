@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5 text-center">
+    <h2 class="mb-4">Unlock Saveior Premium</h2>
+    <p class="lead">Get access to all premium features for just <strong>PKR {{ price }}/month</strong>.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning btn-lg mt-3"><i class="fas fa-crown me-2"></i>Subscribe Now</button>
+    </form>
+    <div class="mt-4">
+        <ul class="list-group d-inline-block text-start">
+            <li class="list-group-item">Team-based saving goals (for HR/companies)</li>
+            <li class="list-group-item">Stress-reducing financial plans for employees</li>
+            <li class="list-group-item">Community & Social Feed (milestones, comments, reactions, anonymous mode)</li>
+            <li class="list-group-item">Monthly savings challenges & giveaways</li>
+            <li class="list-group-item">Wishlist-driven saving (with visual progress)</li>
+        </ul>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card history-card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Gift Contribution History</h2>
+                </div>
+                <div class="card-body">
+                    <div class="gift-summary mb-4">
+                        <h4>{{ gift.title }}</h4>
+                        <p class="text-muted">{{ gift.description }}</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" 
+                                 data-width="{{ gift.progress_percentage }}"
+                                 aria-valuenow="{{ gift.progress_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ gift.progress_percentage }}%
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">
+                                Target: {{ gift.target_amount }} {{ gift.currency }}
+                            </small>
+                            <small class="text-muted">
+                                Current: {{ gift.current_amount }} {{ gift.currency }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="contributions-list">
+                        {% for contribution in contributions %}
+                        <div class="card mb-3 contribution-item">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="card-title mb-0">
+                                        {% if contribution.name %}
+                                            {{ contribution.name }}
+                                        {% else %}
+                                            Anonymous
+                                        {% endif %}
+                                    </h5>
+                                    <small class="text-muted">{{ contribution.created_at|timesince }} ago</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="card-text mb-0">
+                                        {% if contribution.note %}
+                                            "{{ contribution.note }}"
+                                        {% endif %}
+                                    </p>
+                                    <span class="badge badge-primary">
+                                        {{ contribution.amount }} {{ gift.currency }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">No contributions yet. Be the first to contribute!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'contribute_to_gift' gift.id %}" class="btn btn-primary">
+                            <i class="fas fa-gift"></i> Make a Contribution
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.history-card {
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gift-summary {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.progress {
+    height: 20px;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    background-color: #007bff;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-bar[data-width] {
+    width: attr(data-width);
+}
+
+.contribution-item {
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.contribution-item:hover {
+    transform: translateY(-2px);
+}
+
+.contributions-list {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.contributions-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.contributions-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.contributions-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.contributions-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.badge-primary {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+}
+</style>
+{% endblock %} 
