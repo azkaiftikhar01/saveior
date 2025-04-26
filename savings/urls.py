@@ -34,4 +34,5 @@ urlpatterns = [
     path('challenges-premium/', views.challenges_premium, name='challenges_premium'),
     path('challenges-premium/<int:pk>/join/', views.join_challenge_premium, name='join_challenge_premium'),
     path('wishlist/', views.wishlist, name='wishlist'),
+    path('mock-payment/', views.mock_payment, name='mock_payment'),
 ] 

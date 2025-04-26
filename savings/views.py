@@ -876,3 +876,19 @@ def wishlist(request):
     else:
         form = WishlistItemForm()
     return render(request, 'savings/wishlist.html', {'items': items, 'form': form})
+
+@login_required
+def mock_payment(request):
+    if request.method == 'POST':
+        user_profile = request.user.userprofile
+        user_profile.is_premium = True
+        user_profile.save()
+        Subscription.objects.create(
+            user=request.user,
+            end_date=timezone.now().date() + timedelta(days=30),
+            status='active',
+            amount=150
+        )
+        messages.success(request, 'Payment successful! You are now a premium user.')
+        return redirect('dashboard')
+    return render(request, 'savings/mock_payment.html', {'price': 150})

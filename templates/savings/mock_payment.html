@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5 text-center">
+    <h2 class="mb-4">Mock Payment Gateway</h2>
+    <p class="lead">You are about to subscribe to <strong>Saveior Premium</strong> for <strong>PKR {{ price }}/month</strong>.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success btn-lg mt-3">Pay Now</button>
+    </form>
+    <div class="mt-4">
+        <span class="text-muted">(This is a mock payment. No real money will be charged.)</span>
+    </div>
+</div>
+{% endblock %} 
